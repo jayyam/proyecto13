@@ -52,3 +52,6 @@ directivas de blade en html: @if($variable/condicion)/ @else, @unless($variable)
 se pueden combinar
 
 para bucles @forelse = @foreach
+
+
+ruta->accion->redireccion

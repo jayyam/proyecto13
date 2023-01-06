@@ -34,6 +34,12 @@ Route::get('usuarios/nuevo', 'UserController@create')
 
 Route::post('/usuarios', 'UserController@store');
 
+Route::get('usuarios/{user}/editar', 'UserController@edit')
+    ->name('users.edit');
+
+Route::put('usuarios/{user}', 'UserController@update');
+    //->name('users.update');
+
 Route::get('saludo/{name}/{nickname?}', 'WelcomeUserController');//en el controller, con el metodo __invoke llamamos a la funcion sin necesidad de @
 //añadiendo '?' al parametro lo hacemos opcional
 

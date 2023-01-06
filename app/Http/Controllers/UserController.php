@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
 
 class UserController extends Controller
 {
@@ -48,7 +50,54 @@ class UserController extends Controller
 
     public function store()
     {
-        return('Procesando informacion...');
+        //return redirect('usuarios/nuevo')->withInput();//redireccion manual de paginas con contenido guardado
+
+       $data = request()->validate([
+           'name' => 'required',
+           'email' => 'required|email|unique:users,email',
+           'password' => 'required',
+       ],[
+           'name.required' => 'El campo nombre es obligatorio',
+           'email.required' => 'El campo email es obligatorio',
+           'password.required' => 'El campo password es obligatorio',
+       ]);
+
+
+       //dd($data);
+/*
+        if (empty($data['name'])) //ejemplo de validacion
+        {
+            return redirect('usuarios/nuevo')->withErrors([
+
+            ]);
+        }
+*/
+       User::create([
+           'name' => $data['name'],
+           'email' => $data['email'],
+           'password' =>bcrypt($data['password']),
+       ]);
+
+        return redirect('usuarios');
+        //dd($data);
+        //return redirect()->route('users.index');
+
     }
+
+    public function edit(User $user)
+    {
+        return view('users.edit', ['user' => $user]);
+    }
+
+    public function update(User $user)
+    {
+        $data = (request()->all());
+        $data['password'] = bcrypt($data['password']);
+
+        $user->update($data);
+
+        return redirect()->route('users.show', ['user' => $user]);
+    }
+
 
 }

@@ -1,21 +1,21 @@
 @extends('layout')
 
-@section('title', "Crear nuevo usuario")
+@section('title', "Editar usuario")
 
 @section('content')
 
-    <h1>Creando usuario</h1>
+    <h1>Editando usuario</h1>
 
     <?php //dd($errors)?>
 
     @if ($errors->any())
         <div class="alert alert-danger">
             <h5>Por favor corrige los siguientes errores</h5>
-            <!--<ul>
+            <ul>
                 @foreach($errors->all() as $error)
-                    <li>{{$error}}</li>
+                <li>{{$error}}</li>
                 @endforeach
-            </ul>-->
+            </ul>
         </div>
     @endif
 
@@ -24,25 +24,16 @@
         {{ csrf_field() }}
 
         <label for="name">Nombre:</label>
-        <input type="text" name="name" id="name" placeholder="Nombre" value="{{old('name')}}">
-        @if($errors->has('name'))
-            <p>{{$errors->first('name')}}</p>
-        @endif
+        <input type="text" name="name" id="name" placeholder="Nombre" value="{{old('name', $user->name)}}">
         <br>
         <label for="email">Correo electrónico:</label>
-        <input type="email" name="email" placeholder="Correo electronico"  value="{{old('email')}}">
-        @if($errors->has('email'))
-            <p>{{$errors->first('email')}}</p>
-        @endif
+        <input type="email" name="email" placeholder="Correo electronico"  value="{{old('email', $user->email)}}">
         <br>
         <label for="password">Contraseña:</label>
         <input type="password" name="password" placeholder="Escribe tu contraseña">
-        @if($errors->has('password'))
-            <p>{{$errors->first('password')}}</p>
-        @endif
         <br>
 
-        <button type="submit">Crear usuario</button>
+        <button type="submit">Actualizar usuario</button>
 
     </form>
     <p>
