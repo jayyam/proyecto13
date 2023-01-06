@@ -1,0 +1,54 @@
+sudo chown -R omarsantana /home/omarsantana/PhpstormProjects/laravel/proyecto13 para darle permisos de escritura a los archivos y el proyecto
+
+/storage/laravel.log para ver los errores
+
+php artisan view:clear cuando aparezcan errores de framework raros
+php artisan cache:clear
+composer dump-autoload
+
+
+test
+
+/test
+
+whithoutExceptionHandling en los test para ver mas detalles del error cuando falle alguno
+
+features: para escribir pruebas de simulaciones de peticiones http al server
+
+unit: para hacer pruebas a a partes individuales de clases y metodos
+
+command: php artisan make:test
+
+sudo chown -R omarsantana /home/omarsantana/PhpstormProjects/laravel/proyecto13 para darle permisos de escritura a los archivos y el proyecto
+
+//donde (dos parametros: id introducido, debe ajustarse a la expresion regular)
+//mejor hacerlo pasandole parametros dinamicos = {parametro}',
+// recibiendo el parametro en la function ($parametro)
+//con una url limpia: usuarios/detalles/{parametro}
+//en php normal la llama con el id que le pasamos directamente
+//en el navegador: /usuarios/detalles?id=5
+//Laravel convierte una cadena de texto a una respuesta http que mostrara el navegador
+
+
+
+controlllers
+
+/app/http/controllers
+
+los namespaces de laravel son PSR4. los namespaces son los apellidos de una clase
+
+php artisan make:controller
+
+
+vistas
+
+/resources/views
+
+e(variable) para escapar los datos de html y revisar/evitar codigo malicioso. Con blade {{automaticamente escapa}} si la metemos
+
+las vistas se llaman desde el controller. return (archivo.php, compact 'variable declarada con la informacion');
+
+directivas de blade en html: @if($variable/condicion)/ @else, @unless($variable) (a no ser), @empty($variable). HAY QUE CERRARLAS @endif @endempty
+se pueden combinar
+
+para bucles @forelse = @foreach

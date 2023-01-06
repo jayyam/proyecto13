@@ -16,15 +16,34 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('usuarios/{id}', 'UserController@show')
-    ->where('id', '[0-9]+');
 
-Route::get('usuarios','UserController@index');//los resultados de las rutas se pasan a Controllers y se referencian con una @
 
-Route::get('usuarios/nuevo', 'UserController@create');
+
+
+
+Route::get('usuarios/', 'UserController@index')
+            ->name('users');
+
+
+Route::get('usuarios/{user}','UserController@show')//los resultados de las rutas se pasan a Controllers y se referencian con una @
+            ->where('user', '[0-9]+')
+            ->name('users.show');
+
+Route::get('usuarios/nuevo', 'UserController@create')
+            ->name('users.create');
+
+Route::post('/usuarios', 'UserController@store');
 
 Route::get('saludo/{name}/{nickname?}', 'WelcomeUserController');//en el controller, con el metodo __invoke llamamos a la funcion sin necesidad de @
 //añadiendo '?' al parametro lo hacemos opcional
+
+
+
+
+
+
+
+
 
 Route::get('/inicio', function () {//ruta en forma primitiva. sin mover la logica interna a controllers
     return 'Hola Mundo';
