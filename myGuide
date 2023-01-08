@@ -6,6 +6,10 @@ php artisan view:clear cuando aparezcan errores de framework raros
 php artisan cache:clear
 composer dump-autoload
 
+composer install --ignore-platform-req=php para composer.json y conflictos con versiones de php
+agregando tambien en composer.json: config {"platform-check": false o la version necesaria}, lo forza
+
+
 
 test
 

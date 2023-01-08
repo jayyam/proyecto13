@@ -74,12 +74,14 @@ class UsersModuleTest extends TestCase
     /** @test */
     function it_creates_a_new_user()
     {
-        $this->withoutExceptionHandling();
+        //$this->withoutExceptionHandling();
 
         $this->post('/usuarios',[
             'name' => 'Omar Santana',
             'email' => 'omar@mail.com',
             'password' =>'123456',
+            'bio' =>'Programador Laravel y Vue.js',
+            'twitter' =>'https://twitter.com/omardpana22',
         ])->assertRedirect('usuarios/');
             //->assertRedirect(route('users.index'));//no jopa el return
 
@@ -87,6 +89,11 @@ class UsersModuleTest extends TestCase
                 'name' => 'Omar Santana',
                 'email' => 'omar@mail.com',
                 'password' =>'123456',
+            ]);
+
+            $this->assertDatabaseHas('user_profiles', [
+                'bio' =>'Programador Laravel y Vue.js',
+                'twitter' =>'https://twitter.com/omardpana22',
             ]);
 
     }
@@ -107,6 +114,28 @@ class UsersModuleTest extends TestCase
             'email' => 'omar@mail.com',
         ]);
 */
+    }
+    /** @test */
+    function the_name_is_required_when_updating_a_user()
+    {
+        //$this->withoutExceptionHandling();
+
+        $user = factory(User::class)->create();
+
+        $this->from("/usuarios/$user->id/editar")
+             ->put("/usuarios/$user->id",[
+                'name' => '',
+                'email' => 'omar@mail.com',
+                'password' =>'123456',
+            ])->assertRedirect("usuarios/$user->id/editar")
+            ->assertSessionHasErrors(['name']);
+
+            //$this->assertEquals(0, User::count());
+
+                $this->assertDatabaseMissing('users', [
+                    'email' => 'omar@mail.com',
+                ]);
+
     }
     /** @test */
     function the_email_is_required()
@@ -205,6 +234,137 @@ class UsersModuleTest extends TestCase
             'email' => 'omar@mail.com',
             'password' =>'123456',
         ]);
-
     }
+    /** @test */
+    function the_password_is_optional_when_updating_a_user()
+    {
+        $oldPassword = 'CLAVE_ANTIGUA';
+
+        $user = factory(User::class)->create([
+            'password'=> bcrypt($oldPassword)
+        ]);
+
+        $this->from("/usuarios/$user->id/editar")
+            ->put("/usuarios/$user->id",[
+                'name' => 'Omar Santana',
+                'email' => 'omar@mail.com',
+                'password' => '',
+            ])
+            ->assertRedirect("usuarios/$user->id");//redireccion a users.show
+
+        $this->assertCredentials([
+            'name' => 'Omar Santana',
+            'email' => 'omar@mail.com',
+            'password' => $oldPassword,//Aqui comprueba que la contraseña no ha cambiado.
+        ]);
+          //->assertSessionHasErrors(['password']);
+        //$this->assertDatabaseMissing('users', ['email' => 'omar@mail.com']);
+        //$this->assertEquals(0, User::count());
+    }
+    /** @test */
+    function the_email_is_required_when_updating_a_user()
+    {
+        //$this->withoutExceptionHandling();
+
+        $user = factory(User::class)->create();
+
+        $this->from("/usuarios/$user->id/editar")
+            ->put("/usuarios/$user->id",[
+            'name' => 'Omar Santana',
+            'email' => '',
+            'password' =>'123456',
+        ])->assertRedirect("usuarios/$user->id/editar")
+            ->assertSessionHasErrors(['email']);
+
+        //$this->assertEquals(0, User::count());
+
+        $this->assertDatabaseMissing('users', [
+            'name' => 'Omar Santana',
+        ]);
+    }
+    /** @test */
+    function the_email_must_be_valid_when_updating_a_user()
+    {
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/', [
+                'name' => 'Omar Santana',
+                'email' => 'Correo-no-valido',
+                'password' => '123456',
+            ])->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors(['email']);
+        //->assertSessionHasErrors(['name' => 'El campo email es obligatorio']);
+
+        //$this->assertEquals(0, User::count());
+    }
+    /** @test */
+    function the_email_must_be_unique_when_updating_a_user()
+    {
+        //self::markTestIncomplete();
+        //return;//marcando pruebas incompletas
+        //$this->withoutExceptionHandling();
+
+        factory(User::class)->create([
+            'email' => 'existing-email@example.com',
+        ]);
+
+        $user = factory(User::class)->create([
+            'email' => 'omar@mail.com'
+        ]);
+
+        $this->from("/usuarios/$user->id/editar")
+        ->put("/usuarios/$user->id",[
+            'name' => 'Omar Santana',
+            'email' => 'existing-email@example.com',
+            'password' =>'123456',
+        ])->assertRedirect("usuarios/$user->id/editar")
+            ->assertSessionHasErrors(['email']);
+/*
+        $this->assertEquals(0, User::count());
+
+        $this->assertDatabaseMissing('users', [
+            'email' => 'omar@mail.com',
+        ]);
+*/
+    }
+    /** @test */
+    function the_users_email_can_stay_the_same_when_updating_a_user()
+    {
+
+        $user = factory(User::class)->create([
+            'email'=> 'omar@mail.com'
+        ]);
+
+        $this->from("/usuarios/$user->id/editar")
+            ->put("/usuarios/$user->id",[
+                'name' => 'Omar Santana',
+                'email' => 'omar@mail.com',
+                'password' => '123456',
+            ])
+            ->assertRedirect("usuarios/$user->id");//redireccion a users.show
+
+        $this->assertDatabaseHas('users', [
+            'name' => 'Omar Santana',
+            'email' => 'omar@mail.com',
+
+        ]);
+        //->assertSessionHasErrors(['password']);
+        //$this->assertDatabaseMissing('users', ['email' => 'omar@mail.com']);
+        //$this->assertEquals(0, User::count());
+    }
+    /** @test */
+    function it_deletes_a_user()
+    {
+        //$this->withoutExceptionHandling();
+
+        $user = factory(User::class)->create();
+
+        $this->delete("usuarios/$user->id")
+            ->assertRedirect('usuarios');
+
+        $this->assertDatabaseMissing('users', [
+            'id'=> $user->id,
+        ]);
+        //$this->assertSame(0, User::count());
+    }
+
 }

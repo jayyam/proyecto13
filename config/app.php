@@ -108,9 +108,9 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
-    /*
+    /*-------------------------------------------------------------------------
     |--------------------------------------------------------------------------
-    | Logging Configuration
+    | Logging Configuration // ANULADA
     |--------------------------------------------------------------------------
     |
     | Here you may configure the log settings for your application. Out of
@@ -119,11 +119,13 @@ return [
     |
     | Available Settings: "single", "daily", "syslog", "errorlog"
     |
-    */
+
 
     'log' => env('APP_LOG', 'single'),
 
     'log_level' => env('APP_LOG_LEVEL', 'debug'),
+    ---------------------------------------------------------------------------
+    */
 
     /*
     |--------------------------------------------------------------------------
