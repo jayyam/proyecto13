@@ -13,7 +13,8 @@ abstract class TestCase extends BaseTestCase
     {
         $total = $this>$this->getConnection($connection)->table($table)->count();
         $this->assertSame($total,sprintf(
-            "Failed asserting the table [%] is empty, %s %s found.", $table, $total,str_plural('row', $total)
+            "Failed asserting the table [%] is empty, %s %s found.",
+            $table, $total,str_plural('row', $total)
         ));
 
     }

@@ -374,7 +374,7 @@ class UsersModuleTest extends TestCase
         $this->assertDatabaseMissing('users', [
             'id'=> $user->id,
         ]);
-        //$this->assertSame(0, User::count());
+        $this->assertDatabaseEmpty('users');
     }
 
     public function getValidData(array $custom = [])
