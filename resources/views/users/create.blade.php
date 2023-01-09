@@ -37,7 +37,7 @@
                     <input type="password" name="password" class="form-control" placeholder="Escribe tu contraseña">
                 </div>
                 <div class="form-group">
-                    <label for="bio">Bio</label>
+                    <label for="bio">Biografia</label>
                     <textarea name="bio" class="form-control" id="bio">{{old('bio')}}</textarea>
                 </div>
                 <div class="form-group">

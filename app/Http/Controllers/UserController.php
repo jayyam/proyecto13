@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\{User, UserProfile};
+use App\{Http\Requests\CreateUserRequest, User, UserProfile};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
@@ -49,41 +49,26 @@ class UserController extends Controller
         return view('users.create');
     }
 
-    public function store()
+    public function store(CreateUserRequest $request)
     {
-        //return redirect('usuarios/nuevo')->withInput();//redireccion manual de paginas con contenido guardado
+        $request->createUser();
 
-       $data = request()->validate([
-           'name' => 'required',
-           'email' => 'required|email|unique:users,email',
-           'password' => 'required',
-           'bio' => 'required',
-           'twitter' => 'url',//hacer regex para validar url
-       ],[
-           'name.required' => 'El campo nombre es obligatorio',
-           'email.required' => 'El campo email es obligatorio',
-           'password.required' => 'El campo password es obligatorio',
-       ]);
+        return redirect('usuarios');
+        //return redirect()->route('users.index');//redireccion no funciona
+        //return redirect('usuarios/nuevo')->withInput();//redireccion manual de paginas con contenido guardado
 
        //dd($data);//vuelca el contenido de la variable data
 /*
         if (empty($data['name'])) //ejemplo base de validacion. si el nombre esta vacio
         {return redirect('usuarios/nuevo')->withErrors([]);}//redirige y muestra errores
 */
-       $user = User::create([
-           'name' => $data['name'],
-           'email' => $data['email'],
-           'password' =>bcrypt($data['password']),
-       ]);
-
-       $user->profile()->create([
+/*
+       UserProfile::create([
            'bio' => $data['bio'],
            'twitter' => $data['twitter'],
+           'user_id' => $user->id,
        ]);
-
-        return redirect('usuarios');
-        //return redirect()->route('users.index');//redireccion no funciona
-
+*/
     }
 
     public function edit(User $user)

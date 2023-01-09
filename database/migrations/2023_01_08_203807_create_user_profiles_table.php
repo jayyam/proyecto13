@@ -10,6 +10,7 @@ class CreateUserProfilesTable extends Migration
      * Run the migrations.
      *
      * @return void
+     *
      */
     public function up()
     {
@@ -18,9 +19,9 @@ class CreateUserProfilesTable extends Migration
 
             $table->string('bio', 1000);
             $table->string('twitter')->nullable();
-
             $table->unsignedInteger('user_id');
-            $table->foreign('user_id')->reference('id')->on('users');//enlazando clave foranea user_id con id dela tabla users
+            $table->foreign('user_id')->references('id')->on('users');//enlazando clave foranea user_id con id de la tabla users
+
             $table->timestamps();
         });
     }
