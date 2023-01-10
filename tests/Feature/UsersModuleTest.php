@@ -1,18 +1,33 @@
 <?php
 
 namespace Tests\Feature;
+
+use App\Profession;
 use App\User;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use function foo\func;
 
 class UsersModuleTest extends TestCase
 {
     use RefreshDatabase;
 
-    private $from;
+    private $profession;
+
+public function getValidData(array $custom = [])
+    {
+        $this->profession = factory(Profession::class)->create();
+
+        return array_filter(array_merge([
+            'name' => 'Omar Santana',
+            'email' => 'omar@mail.com',
+            'password' => '123456',
+            'profession_id' => $this->profession->id,
+            'bio' => 'Programador Laravel y Vue.js',
+            'twitter' => 'https://twitter.com/omardpana22',
+        ], $custom));
+    }
 
     /** @test  */
     function it_shows_the_users_list()
@@ -79,10 +94,13 @@ class UsersModuleTest extends TestCase
         $this->post('/usuarios/', $this->getValidData())->assertRedirect('usuarios');
             //->assertRedirect(route('users.index'));//no jopa el return
 
+        //dd(User::all());
+
             $this->assertCredentials([
                 'name' => 'Omar Santana',
                 'email' => 'omar@mail.com',
                 'password' => '123456',
+                'profession_id' => $this->profession->id,
             ]);
 
             $this->assertDatabaseHas('user_profiles', [
@@ -115,6 +133,28 @@ class UsersModuleTest extends TestCase
         ]);
     }
     /** @test */
+    function the_profession_id_field_is_optional()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->post('/usuarios/', $this->getValidData([
+            'profession_id' => null,
+        ]))->assertRedirect('usuarios');
+        //->assertRedirect(route('users.index'));//no jopa el return
+
+        $this->assertCredentials([
+            'name' => 'Omar Santana',
+            'email' => 'omar@mail.com',
+            'password' => '123456',
+            'profession_id' =>null,
+        ]);
+
+        $this->assertDatabaseHas('user_profiles', [
+            'bio' =>'Programador Laravel y Vue.js',
+            'user_id' => User::findByEmail('omar@mail.com')->id,
+        ]);
+    }
+    /** @test */
     function the_name_is_required()
     {
         $this->from('usuarios/nuevo')
@@ -129,6 +169,46 @@ class UsersModuleTest extends TestCase
             'email' => 'omar@mail.com',
         ]);
 */
+    }
+    /** @test */
+    function the_profession_must_be_valid()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/',$this->getValidData([
+                'profession_id' => '999',
+            ]))->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors(['profession_id']);
+
+        $this->assertDatabaseEmpty('users');
+        /*
+                $this->assertDatabaseMissing('users', [
+                    'email' => 'omar@mail.com',
+                ]);
+        */
+    }
+    /** @test */
+    function only_not_deleted_professions_can_be_selected()
+    {
+        $nonSelectableProfession = factory(Profession::class)->create([
+            'deleted_at' => now()->format('Y-m-d'),
+        ]);
+
+        $this->withoutExceptionHandling();
+
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/',$this->getValidData([
+                'profession_id' => $nonSelectableProfession->id,
+            ]))->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors(['profession_id']);
+
+        $this->assertDatabaseEmpty('users');
+        /*
+                $this->assertDatabaseMissing('users', [
+                    'email' => 'omar@mail.com',
+                ]);
+        */
     }
     /** @test */
     function the_name_is_required_when_updating_a_user()
@@ -375,16 +455,5 @@ class UsersModuleTest extends TestCase
             'id'=> $user->id,
         ]);
         $this->assertDatabaseEmpty('users');
-    }
-
-    public function getValidData(array $custom = [])
-    {
-        return array_filter(array_merge([
-            'name' => 'Omar Santana',
-            'email' => 'omar@mail.com',
-            'password' => '123456',
-            'bio' => 'Programador Laravel y Vue.js',
-            'twitter' => 'https://twitter.com/omardpana22',
-        ], $custom));
     }
 }

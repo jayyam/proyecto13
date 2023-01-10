@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Profession;
 use App\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class CreateUserRequest extends FormRequest
 {
@@ -32,6 +34,7 @@ class CreateUserRequest extends FormRequest
                 'password' => 'required',
                 'bio' => 'required',
                 'twitter' => ['nullable','url'],//hacer regex para validar url
+                'profession_id' => Rule::exist('profession', 'id')->whereNull('deleted_at'),
             ];
     }
 
@@ -54,11 +57,12 @@ class CreateUserRequest extends FormRequest
                 'name' => $data['name'],//this->name
                 'email' => $data['email'],//this->email
                 'password' =>bcrypt($data['password']),//this->password
+                'profession_id' => $data['profession_id'] ?? null,
             ]);
 
             $user->profile()->create([
                 'bio' => $data['bio'],//this->bio
-                'twitter' => array_get($data, 'twitter'),//this->twitter
+                'twitter' => $data ['twitter'] ?? null,//this->twitter
             ]);
         });
     }
