@@ -58,4 +58,9 @@ se pueden combinar
 para bucles @forelse = @foreach
 
 
-ruta->accion->redireccion
+->ruta->accion->redireccion
+
+test->controlador->rules de validacion->crear metodos en el modelo
+
+añadiendo datepicker javascript a proyecto laravel
+ es igual que cdns de bootstrap. para configurarla generar otro script
