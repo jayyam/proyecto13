@@ -6,11 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Profession extends Model
 {
-    //
-    protected $fillable = ['title']; //para permitir asignacion masiva de datos a la tabla
+    protected $fillable = ['title'];
 
-    public function users()
+    public function profiles()
     {
-        return $this->hasMany(User::class);
+        return $this->hasMany(UserProfile::class);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Profession;
+use App\Role;
 use App\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
@@ -27,43 +27,62 @@ class CreateUserRequest extends FormRequest
      */
     public function rules()
     {
-        return
-            [
-                'name' => 'required',
+        return [
+            'first_name' => 'required',
+            'last_name' => 'required',
                 'email' => 'required|email|unique:users,email',
                 'password' => 'required',
                 'bio' => 'required',
-                'twitter' => ['nullable','url'],//hacer regex para validar url
-                'profession_id' => Rule::exist('profession', 'id')->whereNull('deleted_at'),
+            'twitter' => ['nullable', 'present', 'url'],
+            'profession_id' => [
+                'nullable',
+                'present',
+                Rule::exists('professions', 'id')
+                                ->whereNull('deleted_at')
+            ],
+            'skills' => [
+                'array',
+                Rule::exists('skills', 'id')
+            ],
+            'role' => [
+                'nullable',
+                Rule::in(Role::getList())
+            ],
+            'state' => [
+                Rule::in(['active', 'inactive'])
+            ],
             ];
     }
 
     public function messages()
     {
         return [
-        'name.required' => 'El campo nombre es obligatorio',
+            'first_name.required' => 'El campo nombre es obligatorio',
+            'last_name.required' => 'El campo apellidos es obligatorio',
         'email.required' => 'El campo email es obligatorio',
-        'password.required' => 'El campo password es obligatorio',
+            'password.required' => 'El campo contraseña es obligatorio',
         ];
     }
 
     public function createUser()
     {
-        DB::transaction(function ()
-        {
-            $data =$this->validated();
-
+        DB::transaction(function () {
             $user = User::create([
-                'name' => $data['name'],//this->name
-                'email' => $data['email'],//this->email
-                'password' =>bcrypt($data['password']),//this->password
-                'profession_id' => $data['profession_id'] ?? null,
+                'first_name' => $this->first_name,
+                'last_name' => $this->last_name,
+                'email' => $this->email,
+                'password' => bcrypt($this->password),
+                'role' => $this->role ?? 'user',
+                'state' => $this->state,
             ]);
 
             $user->profile()->create([
-                'bio' => $data['bio'],//this->bio
-                'twitter' => $data ['twitter'] ?? null,//this->twitter
+                'bio' => $this->bio,
+                'twitter' => $this->twitter,
+                'profession_id' => $this->profession_id,
             ]);
+
+            $user->skills()->attach($this->skills ?? []);
         });
     }
 }

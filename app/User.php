@@ -2,23 +2,20 @@
 
 namespace App;
 
-use Illuminate\Notifications\Notifiable;
+use App\Filters\UserFilter;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use Notifiable, SoftDeletes;
 
-    //protected $table = 'users';
+    protected $guarded = [];
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'name', 'email', 'password', 'profession_id',
+    protected $casts = [
+        'active' => 'bool',
+        'last_login_at' => 'datetime',
     ];
 
     /**
@@ -27,30 +24,59 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token'
     ];
 
-    protected $casts = [
-        'is_admin' => 'boolean',
-    ];
-
-    public static function findByEmail($email)
+    /**
+     * Create a new Eloquent query builder for the model.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder|static
+     */
+    public function newEloquentBuilder($query)
     {
-        return static::where(compact('email'))->first();
+        return new UserQuery($query);
     }
 
-    public function profession()
+    public function newQueryFilter()
     {
-        return $this->belongsTo(Profession::class);
+        return new UserFilter;
     }
 
     public function profile()
     {
-        return $this->hasOne(UserProfile::class);
+        return $this->hasOne(UserProfile::class)->withDefault();
+    }
+
+    public function skills()
+    {
+        return $this->belongsToMany(Skill::class);
+    }
+
+    public function team()
+    {
+        return $this->belongsTo(Team::class)->withDefault();
     }
 
     public function isAdmin()
     {
-        return $this->is_admin;
+        return $this->role === 'admin';
+    }
+
+    public function getNameAttribute()
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
+
+    public function getStateAttribute()
+    {
+        if ($this->active != null) {
+            return $this->active ? 'active' : 'inactive';
+        }
+    }
+
+    public function setStateAttribute($value)
+    {
+        $this->attributes['active'] = $value == 'active';
     }
 }

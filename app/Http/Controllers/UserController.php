@@ -2,104 +2,116 @@
 
 namespace App\Http\Controllers;
 
-use App\{Http\Requests\CreateUserRequest, User, UserProfile};
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Validation\Rule;
+use App\{Http\Requests\CreateUserRequest, Http\Requests\UpdateUserRequest, Profession, Skill, Sortable, User};
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Sortable $sortable)
     {
+        $users = User::query()
+            ->with('team','skills','profile.profession')
+            ->withLastLogin()
+            ->onlyTrashedIf(request()->routeIs('users.trashed'))
+            ->when(request('team'), function ($query, $team) {
+                if ($team === 'with_team') {
+                    $query->has('team');
+                } elseif ($team === 'without_team') {
+                    $query->doesntHave('team');
+                }
+            })
+            ->applyFilters()
+            ->orderBy('created_at', 'desc')
+            ->paginate();
 
-        $users = User::all();
+        $sortable->appends($users->parameters());
 
-        $title = 'Listado de usuarios';
-/*
-        return view('users.index')
-            ->with('users', User::all())
-            ->with('title' ,'Listado de usuarios');
-*/
-        return view('users.index', compact('title', 'users'));
+        return view('users.index', [
+            'users' => $users,
+            'view' => request()->routeIs('users.trashed') ? 'trash' : 'index',
+            'skills' => Skill::orderBy('name')->get(),
+            'checkedSkills' => collect(request('skills')),
+            'sortable' => $sortable,
+        ]);
     }
 
     public function show(User $user)
     {
-         //dd($user);
-
-        /*
-        $user = User::findOrFail($id);
-
-        if($user==null)
-        {
+        if ($user == null) {
             return response()->view('errors.404', [], 404);
         }
-        */
-
-        //exit('Linea no alcanzada');
-
+        
         return view('users.show', compact('user'));
+    }
 
-
+    protected function form($view, User $user)
+    {
+        return view($view, [
+            'user' => $user,
+            'professions' => Profession::orderBy('title', 'ASC')->get(),
+            'skills' => Skill::orderBy('name', 'ASC')->get(),
+        ]);
     }
 
     public function create()
     {
-        return view('users.create');
+        return $this->form('users.create', new User);
     }
 
     public function store(CreateUserRequest $request)
     {
         $request->createUser();
 
-        return redirect('usuarios');
-        //return redirect()->route('users.index');//redireccion no funciona
-        //return redirect('usuarios/nuevo')->withInput();//redireccion manual de paginas con contenido guardado
-
-       //dd($data);//vuelca el contenido de la variable data
-/*
-        if (empty($data['name'])) //ejemplo base de validacion. si el nombre esta vacio
-        {return redirect('usuarios/nuevo')->withErrors([]);}//redirige y muestra errores
-*/
-/*
-       UserProfile::create([
-           'bio' => $data['bio'],
-           'twitter' => $data['twitter'],
-           'user_id' => $user->id,
-       ]);
-*/
+        return redirect()->route('users');
     }
 
     public function edit(User $user)
     {
-        return view('users.edit', ['user' => $user]);
+        return $this->form('users.edit', $user);
     }
 
-    public function update(User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        //dd('actualizar usuario');
+        $request->updateUser($user);
 
-        $data = request()->validate([
-            'name' => 'required',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'password' => '',
-        ]);
-        if ($data['password'] != null) {
-            $data['password'] = bcrypt($data['password']);
+        return redirect()->route('user.show', $user);
         }
-        else
+
+    public function destroy($id)
         {
-            unset($data['password']);
-        }
-        $user->update($data);
+        $user = User::onlyTrashed()
+            ->where('id', $id)
+            ->firstOrFail();
 
-        return redirect()->route('users.show', ['user' => $user]);
+        $user->forceDelete();
+
+        return redirect()->route('users.trashed');
     }
-    function destroy(User $user)
+
+    public function trash(User $user)
     {
+        $user->profile()->delete();
         $user->delete();
 
-        return redirect('usuarios');
+        return redirect()->route('users');
     }
+
+    /*public function trashed(Sortable $sortable)
+    {
+        $users = User::onlyTrashed()
+            ->when(request('order'), function ($q) {
+                $q->orderBy(request('order'), request('direction','asc'));
+            }, function ($q) {
+                $q->orderBy('created_at', 'desc');
+            })
+            ->paginate();
+
+        $sortable->setCurrentOrder(request('order'), request('direction'));
+
+        return view('users.index', [
+            'users' => $users,
+            'view' => 'trash',
+            'sortable' => $sortable,
+        ]);
+    }*/
+
 }

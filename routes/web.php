@@ -16,43 +16,37 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('usuarios', 'UserController@index')->name('users');
 
+Route::get('usuarios/nuevo', 'UserController@create')->name('user.create');
 
+Route::post('usuarios', 'UserController@store')->name('user.store');
 
+Route::get('usuarios/papelera', 'UserController@index')
+    ->name('users.trashed');
 
+Route::get('usuarios/{user}/editar', 'UserController@edit')->name('users.edit');
 
-Route::get('usuarios/', 'UserController@index')
-            ->name('users');
+Route::patch('usuarios/{user}/papelera', 'UserController@trash')
+    ->name('users.trash');
 
+Route::get('usuarios/{user}', 'UserController@show')
+    ->name('user.show');
 
-Route::get('usuarios/{user}','UserController@show')//los resultados de las rutas se pasan a Controllers y se referencian con una @
-            ->where('user', '[0-9]+')
-            ->name('users.show');
+Route::put('usuarios/{user}', 'UserController@update')->name('user.update');
 
-Route::get('usuarios/nuevo', 'UserController@create')
-            ->name('users.create');
+Route::delete('usuarios/{id}', 'UserController@destroy')->name('user.destroy');
 
-Route::post('/usuarios', 'UserController@store');
+Route::get('editar-perfil', 'ProfileController@edit');
+Route::put('editar-perfil', 'ProfileController@update');
 
-Route::get('usuarios/{user}/editar', 'UserController@edit')
-    ->name('users.edit');
+Route::get('profesiones', 'ProfessionController@index')
+    ->name('profession.index');
+Route::delete('profesiones/{profession}', 'ProfessionController@destroy')
+    ->name('profession.destroy');
 
-Route::put('usuarios/{user}', 'UserController@update');
+Route::get('habilidades', 'SkillController@index')
+    ->name('skill.index');
 
-Route::get('saludo/{name}/{nickname?}', 'WelcomeUserController');//en el controller, con el metodo __invoke llamamos a la funcion sin necesidad de @
-//añadiendo '?' al parametro lo hacemos opcional
+Route::get('saludo/{name}/{nickname?}', 'WelcomeUserController');
 
-Route::delete('/usuarios/{user}', 'UserController@destroy')
-    ->name('users.destroy');
-
-
-
-
-
-
-
-
-
-Route::get('/inicio', function () {//ruta en forma primitiva. sin mover la logica interna a controllers
-    return 'Hola Mundo';
-});

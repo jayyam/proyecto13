@@ -1,63 +1,42 @@
 @extends ('layout')
 
-@section('content')
+@section('title', trans("users.title.{$view}"))
 
-    <div class="d-flex justify-content-between align-items-end mb-2">
-        <h1 class="pb-1">{{$title}}</h1>
+@section('content')
+    <div class="d-flex justify-content-between align-items-end mb-3">
+        <h1 class="pb-1">Usuarios</h1>
         <p>
-            <a href="{{ route('users.create') }}" class="btn btn-primary">Nuevo usuario</a>
+            @if($view === 'index')
+                <a href="{{ route('users.trashed') }}" class="btn btn-success">Ver Papelera</a>
+                <a href="{{ route('user.create') }}" class="btn btn-primary">Nuevo usuario</a>
+            @else
+                <a href="{{ route('users') }}" class="btn btn-primary">Usuarios</a>
+            @endif
         </p>
     </div>
 
+    @includeWhen($view === 'index','users._filters')
 
 @if($users->isNotEmpty())
-
-    <table class="table">
+        <div class="table-responsive-lg table-striped">
+            <table class="table table-sm">
         <thead class="thead-dark">
         <tr>
-            <th scope="col">Id</th>
-            <th scope="col">Nombre</th>
-            <th scope="col">Email</th>
-            <th scope="col">Acciones</th>
+                    <th scope="col"># <span class="oi oi-caret-bottom"></span><span class="oi oi-caret-top"></span></th>
+                    <th scope="col"><a href="{{ $sortable->url('first_name') }}" class="{{ $sortable->classes('first_name') }}">Nombre</a></th>
+                    <th scope="col"><a href="{{ $sortable->url('email') }}" class="{{ $sortable->classes('email') }}">Correo</a></th>
+                    <th scope="col"><a href="{{ $sortable->url('created_at') }}" class="{{ $sortable->classes('created_at') }}">Fechas</a></th>
+                    <th scope="col" class="text-right th-actions">Acciones</th>
         </tr>
         </thead>
         <tbody>
-        @foreach ($users as $user)
-
-        <tr>
-            <th scope="row">{{$user->id}}</th>
-            <td>{{$user->name}}</td>
-            <td>{{$user->email}}</td>
-            <td>
-                <form action="{{ route('users.destroy', $user) }}" method="POST">
-                    {{method_field('DELETE')}}
-                    {{ csrf_field() }}
-
-                    <a href="{{ route('users.show', $user) }}" class="btn btn-link"><i class="fa-solid fa-eye"></i></a>
-                    <!--<a href="{{ route('users.show', ['id' => $user->id]) }}">Otra forma de mostrar "Detalles"</a>-->
-                    <!--<a href="{{ url("/usuarios/$user->id") }}">Otra forma de mostrar "Detalles"</a>-->
-
-                    <a href="{{ route('users.edit', $user) }}" class="btn btn-link"><i class="fa-solid fa-pencil"></i></a>
-
-                    <button type="submit" class="btn btn-link"><i class="fa-solid fa-trash"></i></button>
-                </form>
-            </td>
-        </tr>
-        @endforeach
+                @each('users._row', $users, 'user')
         </tbody>
     </table>
+        {{ $users->links() }}
 @else
-    <p>No hay usuarios registrados.</p>
+        <p>No hay usuarios registrados</p>
 @endif
-    <!--<ul>
-        @forelse ($users as $user)
-            <li>
-                {{$user->name}}, ({{$user->email}})
-            </li>
-        @empty
-            <li>No hay usuarios registrados.</li>
-        @endforelse
-    </ul>-->
 @endsection
 
 @section('sidebar')

@@ -1,43 +1,22 @@
 @extends('layout')
 
-@section('title', "Editar usuario")
+@section('title', 'Editar usuario')
 
 @section('content')
-    <?php //dd($errors)?>
-    <div class="card">
-        <h3 class="card-header">Editar usuario</h3>
+    @card
+        @slot('header', 'Editar usuario')
 
-        <div class="card-body">
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <h5>Por favor corrige los siguientes errores</h5>
-                    <ul>
-                        @foreach($errors->all() as $error)
-                            <li>{{$error}}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+        @include('shared._errors')
 
-            <form method="POST" action="{{url("usuarios/$user->id")}}">
+        <form action="{{ route('user.update', $user) }}" method="post">
                 {{method_field('PUT')}}
-                {{ csrf_field() }}
 
-                <div class="form-group">
-                    <label for="name">Nombre:</label>
-                    <input type="text" name="name" id="name" class="form-control" placeholder="Nombre" value="{{old('name')}}">
-                </div>
-                <div class="form-group">
-                        <label for="email">Correo electrónico:</label>
-                        <input type="email" name="email" class="form-control" placeholder="Correo electronico"  value="{{old('email')}}">
-                </div>
-                <div class="form-group">
-                    <label for="password">Contraseña:</label>
-                    <input type="password" name="password" class="form-control" placeholder="Escribe tu contraseña">
-                </div>
+            @include('users._fields')
+
+            <div class="form-group mt-4">
                 <button type="submit" class="btn btn-primary">Actualizar usuario</button>
-                <a href="{{url('/usuarios')}}" class="btn btn-link">Volver al listado de usuarios</a>
-            </form>
+                <a href="{{ route('users') }}" class="btn btn-link">Regresar al listado de usuarios</a>
         </div>
-    </div>
+        </form>
+    @endcard
 @endsection

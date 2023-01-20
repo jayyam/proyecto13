@@ -1,13 +1,14 @@
 <?php
 
-use App\Profession;
-use App\User;
+use App\{Profession, Skill, Team, User};
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-
 
 class UserSeeder extends Seeder
 {
+    private $professions;
+    private $skills;
+    private $teams;
+
     /**
      * Run the database seeds.
      *
@@ -15,42 +16,61 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        /*
-        $professions = DB::select('SELECT id FROM professions WHERE title = ? LIMIT 0,1', ['Desarrollador back-end']);
+        $this->fetchRelations();
 
-        $professions = DB::select(
-            'SELECT id FROM professions WHERE title=?',
-            ['Desarrollador Back-End']
-        );
-        $profession = DB::table('professions')
-            ->select('id')
-            ->where('title', 'Desarrollador Back-End')
-            ->first();
+        $user = $this->createAdmin();
 
-        $professionId = DB::table('professions')
-            ->whereTitle('Desarrollador Back-End')
-            ->value('id');
+        foreach (range(1, 999) as $i) {
+            $this->createRandomUser();
+        }
+    }
 
-        */
+    private function fetchRelations(): void
+    {
+        $this->professions = Profession::all();
+        $this->skills = Skill::all();
+        $this->teams = Team::all();
+    }
 
-        $professionId = Profession::where('title', 'Desarrollador back-end')->value('id');
-
-
-        //dd($profession);
-
-        factory(User::class)->create([
-            'name' => 'Omar Santana',
-            'email' => 'omar@mail.com',
+    private function createAdmin()
+    {
+        $user = User::create([
+            'team_id' => $this->teams->firstWhere('name', 'IES Ingeniero')->id,
+            'first_name' => 'Pepe',
+            'last_name' => 'Pérez',
+            'email' => 'pepe@mail.es',
             'password' => bcrypt('123456'),
-            'profession_id' => $professionId,
-            'is_admin' => true,
+            'role' => 'admin',
+            'created_at' => now(),
+            'active' => true,
         ]);
 
-        factory(User::class)->create([
-            'profession_id' => $professionId
+        $user->profile()->create([
+            'bio' => 'Programador',
+            'profession_id' => $this->professions
+                ->where('title', 'Desarrollador Back-End')
+                ->first()
+                ->id,
+        ]);
+        return $user;
+    }
+
+    private function createRandomUser(): void
+    {
+        $user = factory(User::class)->create([
+            'team_id' => rand(0, 2) ? null : $this->teams->random()->id,
+            'active' => rand(0,3) ? true : false,
+            'created_at' => now()->subDays(rand(1,90)),
         ]);
 
-        factory(User::class, 48)->create();
+        $user->skills()->attach($this->skills->random(rand(0, 7)));
 
+        $user->profile()->update([
+            'profession_id' => rand(0, 2) ? $this->professions->random()->id : null,
+        ]);
+
+        factory(\App\Login::class)->times(rand(1,10))->create([
+            'user_id' => $user->id
+        ]);
     }
 }

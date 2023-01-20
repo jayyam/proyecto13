@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Sortable;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -13,7 +16,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Blade::component('shared._card', 'card');
+
+
+
+        $this->app->bind(LengthAwarePaginator::class,
+                    \App\LengthAwarePaginator::class);
     }
 
     /**
@@ -23,6 +31,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->bind(Sortable::class, function ($app) {
+            return new Sortable(request()->url());
+        });
     }
 }

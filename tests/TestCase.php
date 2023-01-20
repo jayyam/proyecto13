@@ -2,20 +2,45 @@
 
 namespace Tests;
 
-use App\User;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Testing\TestResponse;
 
 abstract class TestCase extends BaseTestCase
 {
-    use CreatesApplication;
+    use CreatesApplication, TestHelpers, DetectRepeatedQueries;
 
-    protected function assertDatabaseEmpty($table, $connection =null)
+    protected $defaultData;
+
+    protected function setUp(): void
     {
-        $total = $this>$this->getConnection($connection)->table($table)->count();
-        $this->assertSame($total,sprintf(
-            "Failed asserting the table [%] is empty, %s %s found.",
-            $table, $total,str_plural('row', $total)
-        ));
+        parent::setUp();
 
+        $this->addTestResponseMacros();
+
+        $this->withoutExceptionHandling();
+
+        $this->enableQueryLog();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->flushQueryLog();
+
+        parent::tearDown();
+    }
+
+    public function addTestResponseMacros(): void
+    {
+        TestResponse::macro('viewData', function ($key) {
+            $this->ensureResponseHasView();
+
+            $this->assertViewHas($key);
+
+            return $this->original->$key;
+        });
+
+        TestResponse::macro('assertViewCollection', function ($var) {
+            return new TestCollectionData($this->viewData($var));
+        });
     }
 }
