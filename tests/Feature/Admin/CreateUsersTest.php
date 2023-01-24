@@ -28,6 +28,8 @@ class CreateUsersTest extends TestCase
     /** @test */
     function it_loads_the_new_users_page()
     {
+        //$this->withoutExceptionHandling();
+
         $profession = factory(Profession::class)->create();
         $skillA = factory(Skill::class)->create();
         $skillB = factory(Skill::class)->create();

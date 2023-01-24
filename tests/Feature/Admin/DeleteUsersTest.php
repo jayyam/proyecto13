@@ -47,6 +47,12 @@ class DeleteUsersTest extends TestCase
     /** @test */
     function it_sends_a_user_to_the_trash()
     {
+        /*
+          $this->withoutExceptionHandling();
+          $this->assertSoftDeleted('skill_user', ['user_id => $user->id]);
+          $this->assertSoftDeleted('skill_user', ['user_id'=> $user->id,]);
+        */
+
         $user = factory(User::class)->create();
 
         $user->skills()->attach(factory(Skill::class)->create());
@@ -59,7 +65,7 @@ class DeleteUsersTest extends TestCase
             'id' => $user->id
         ]);
         $this->assertSoftDeleted('skill_user', [
-            'user_id' => $user->id,
+            'user_id' => $user->id
         ]);
         $this->assertSoftDeleted('user_profiles', [
             'user_id' => $user->id,
