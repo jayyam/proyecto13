@@ -8,19 +8,23 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class WelcomeUsersTest extends TestCase
 {
-    /** @test */
-    function it_welcomes_users_with_nicknames()
+    /**
+     * @test
+     */
+    function it_welcomes_users_with_nickname()
     {
-        $this->get('saludo/omar/moreno')
-        ->assertStatus(200)
-        ->assertSee("Bienvenido Omar. Tu apodo es moreno.");
+        $this->get('saludo/pepe/pepote')
+            ->assertStatus(200)
+            ->assertSee('Bienvenido Pepe, tu apodo es pepote');
     }
 
-    /** @test */
-    function it_welcomes_users_without_nicknames()
+    /**
+     * @test
+     */
+    function it_welcomes_users_without_nickname()
     {
-        $this->get('saludo/omar')
+        $this->get('saludo/pepe')
             ->assertStatus(200)
-            ->assertSee("Bienvenido Omar.");
+            ->assertSee('Bienvenido Pepe, no tienes apodo');
     }
 }

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Sortable;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -18,7 +19,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Blade::component('shared._card', 'card');
 
-
+        Paginator::useBootstrap();
 
         $this->app->bind(LengthAwarePaginator::class,
                     \App\LengthAwarePaginator::class);
